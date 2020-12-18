@@ -3,6 +3,8 @@ import { IEvent } from '../interface/event';
 import { ITimeOnDay } from '../interface/time-on-day';
 import { GET_SUCCESS } from '../config/constant';
 
+const MILLISECONDS_OF_DAY = 24 * 60 * 60 * 1000;
+
 export const getDateInWeek = (startDate: string) => {
   const current = new Date(startDate);
   const first = current.getDate() - current.getDay() + 1; // INFO: default is sunday, increment by one this become monday
@@ -41,21 +43,23 @@ export const getTimeStamp = (date: string | number) => {
 
 export const customDayForWeek = (mondayTimestamp: number) => {
   const getDateStart = new Date(mondayTimestamp).getDate();
+  const datePlaceHolder = [{}, {}, {}, {}, {}, {}];
   const listDate = [];
-  for (let i = 0; i <= 5; i++) {
+  datePlaceHolder.forEach((item, index) => {
     listDate.push({
       date: new Date(
-        new Date(mondayTimestamp).getTime() + 24 * 60 * 60 * 1000 * i,
+        new Date(mondayTimestamp).getTime() + MILLISECONDS_OF_DAY * index,
       ),
-      day: getDateStart + i,
+      day: getDateStart + index,
     });
-  }
+  });
   const newTime = [];
-  Object.keys(definedTimeGetEvent).forEach((key, index) => {
-    const trunkStart = definedTimeGetEvent[key].start_time.split(':');
-    const trunkEnd = definedTimeGetEvent[key].end_time.split(':');
+  const timeGetEvent = definedTimeGetEvent.hours;
+  Object.keys(timeGetEvent).forEach((key, index) => {
+    const trunkStart = timeGetEvent[key].start_time.split(':'); // INFO: example after trunk ['08','00','00']
+    const trunkEnd = timeGetEvent[key].end_time.split(':'); // INFO: example after trunk ['08','00','00']
     newTime.push({
-      ...definedTimeGetEvent[key],
+      ...timeGetEvent[key],
       ...listDate[index],
       start: new Date(listDate[index].date).setHours(
         trunkStart[0],
@@ -103,10 +107,10 @@ export const getEventForDay = (
   return finalData;
 };
 
-export const customResponse = (startDate: string, data: any) => {
+export const customResponse = (startDate: string, totalDate: number, data) => {
   return {
     start: new Date(startDate).toLocaleDateString(),
-    length: 7,
+    length: Number(totalDate),
     days: data,
   };
 };
@@ -114,12 +118,13 @@ export const customResponse = (startDate: string, data: any) => {
 export const getFinalResponse = (
   mondayTimestamp: number,
   startDate: string,
+  totalDate: number,
   eventList: IEvent[] = [],
 ) => {
   const customDay = customDayForWeek(mondayTimestamp);
   const data = getEventForDay(customDay, eventList);
   return {
     message: GET_SUCCESS('event for user'),
-    data: customResponse(startDate, data),
+    data: customResponse(startDate, totalDate, data),
   };
 };

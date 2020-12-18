@@ -26,6 +26,7 @@ export class AppController {
   @Get('/get-event')
   async getEvent(
     @Query('start-date') startDate,
+    @Query('total-date') totalDate,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -35,10 +36,15 @@ export class AppController {
       const { events } = response.data;
       if (events?.length) {
         const eventList = getEventOnWeek(events, monday, saturday);
-        const finalResponse = getFinalResponse(monday, startDate, eventList);
+        const finalResponse = getFinalResponse(
+          monday,
+          startDate,
+          totalDate,
+          eventList,
+        );
         return res.status(STATUS_SERVER.SUCCESS).json(finalResponse);
       } else {
-        const finalResponse = getFinalResponse(monday, startDate);
+        const finalResponse = getFinalResponse(monday, startDate, totalDate);
         return res.status(STATUS_SERVER.SUCCESS).json(finalResponse);
       }
     } catch (error) {
