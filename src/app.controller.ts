@@ -5,23 +5,10 @@ import {
   getEventOnWeek,
   getFinalResponse,
 } from './helper/app-controller.helper';
-import { GET_SUCCESS, MESSAGE_SERVER, STATUS_SERVER } from './config/constant';
+import { MESSAGE_SERVER, STATUS_SERVER } from './config/constant';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
-  @Get('/get-date-in-week')
-  getDateInWeek(
-    @Query('start-date') startDate,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    const date = this.appService.getDateOnWeek(startDate);
-    return res.status(STATUS_SERVER.SUCCESS).json({
-      message: GET_SUCCESS('date'),
-      data: date,
-    });
-  }
 
   @Get('/get-event')
   async getEvent(

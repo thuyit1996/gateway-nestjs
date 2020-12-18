@@ -6,13 +6,6 @@ import { getDateInWeek } from './helper/app-controller.helper';
 export class AppService {
   constructor(private readonly callApiService: ApiService) {}
 
-  getRetainerLead() {
-    const path =
-      '/api/assign/v1alpha1/products/car-insurance/distribution/leadtypes/retainer';
-    const result = this.callApiService.callApiGet(path);
-    return result;
-  }
-
   getDateOnWeek(startDate: string) {
     return getDateInWeek(startDate);
   }
