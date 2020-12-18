@@ -17,9 +17,9 @@ export class AppService {
     return getDateInWeek(startDate);
   }
 
-  getAllEvent() {
+  async getAllEvent() {
     const path = `/api/calendar/v1alpha1/calendars/-/events?pageSize=100`;
-    const result = this.callApiService.callApiGet(path);
+    const result = await this.callApiService.callApiGet(path);
     return result;
   }
 }
