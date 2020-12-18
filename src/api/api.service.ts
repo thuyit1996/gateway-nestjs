@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import constant from '../config/constant';
+import { constant } from '../config/constant';
 @Injectable()
 export class ApiService {
   getUrl(path: string) {

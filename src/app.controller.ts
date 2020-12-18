@@ -1,16 +1,11 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  Param,
-  Query,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response, Request } from 'express';
-import { customDayForWeek, customResponse, getTime } from './helper/function';
-import { slots } from './config/fake-data';
+import {
+  getEventOnWeek,
+  getFinalResponse,
+} from './helper/app-controller.helper';
+import { GET_SUCCESS, MESSAGE_SERVER, STATUS_SERVER } from './config/constant';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -21,11 +16,10 @@ export class AppController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    console.log(startDate);
     const date = this.appService.getDateOnWeek(startDate);
-    return res.status(200).json({
-      msg: 'Get date successfully!',
-      date: date,
+    return res.status(STATUS_SERVER.SUCCESS).json({
+      message: GET_SUCCESS('date'),
+      data: date,
     });
   }
 
@@ -40,53 +34,16 @@ export class AppController {
       const response = await this.appService.getAllEvent();
       const { events } = response.data;
       if (events?.length) {
-        const eventList = events
-          .filter((item) => {
-            return (
-              getTime(item.startTime) >= monday &&
-              getTime(item.endTime) <= saturday
-            );
-          })
-          .map((item) => {
-            return {
-              ...item,
-              day: new Date(item.startTime).getDate(),
-            };
-          });
-        const customDay = customDayForWeek(monday);
-        const finalData = [];
-        if (customDay?.length) {
-          customDay.forEach((item) => {
-            const eventForDay = [];
-            eventList.forEach((event) => {
-              if (event.day === item.day) {
-                if (
-                  getTime(event.startTime) >= item.start &&
-                  getTime(event.endTime) <= item.end
-                ) {
-                  eventForDay.push(event);
-                }
-              }
-              delete event.day;
-            });
-            finalData.push({
-              date: new Date(item.date).toLocaleDateString('en-CA'),
-              start: new Date(item.start).toISOString(),
-              end: new Date(item.end).toISOString(),
-              slots: slots,
-              events: eventForDay,
-            });
-          });
-        }
-        const customDataResponse = customResponse(startDate, finalData);
-        return res.status(200).json({
-          msg: 'Get date successfully!',
-          data: customDataResponse,
-        });
+        const eventList = getEventOnWeek(events, monday, saturday);
+        const finalResponse = getFinalResponse(monday, startDate, eventList);
+        return res.status(STATUS_SERVER.SUCCESS).json(finalResponse);
+      } else {
+        const finalResponse = getFinalResponse(monday, startDate);
+        return res.status(STATUS_SERVER.SUCCESS).json(finalResponse);
       }
     } catch (error) {
-      return res.status(500).json({
-        msg: 'Something error, try again latter',
+      return res.status(STATUS_SERVER.INTERNAL).json({
+        message: MESSAGE_SERVER.SERVER_ERROR,
       });
     }
   }

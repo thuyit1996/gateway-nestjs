@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ApiService } from './api/api.service';
-import { getDateInWeek } from './helper/function';
+import { getDateInWeek } from './helper/app-controller.helper';
 
 @Injectable()
 export class AppService {
